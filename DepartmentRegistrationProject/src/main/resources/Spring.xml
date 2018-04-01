@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	<!-- Our Code which we developed -->
+	<bean id="hibernateUtilObj" class="com.java.util.HibernateUtil" />
+
+	<bean id="sessionFactoryObj" factory-bean="hibernateUtilObj"
+		factory-method="getSessionFactory" />
+
+	<bean id="departmentDaoObj" class="com.java.demo.dao.DepartmentDAO">
+		<property name="xeConSessionFactory" ref="sessionFactoryObj" />
+	</bean>
+
+	<bean id="xeHrDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="oracle.jdbc.xa.client.OracleXADataSource" />
+		<property name="url" value="jdbc:oracle:thin:@localhost:1521:xe" />
+		<property name="username" value="hr" />
+		<property name="password" value="hr" />
+	</bean>
+
+
+	<bean id="xeHrSessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+
+		<property name="dataSource" ref="xeHrDataSource" />
+
+		<property name="mappingResources">
+			<list>
+				<value>department.hbm.xml</value>
+			</list>
+		</property>
+
+		<property name="hibernateProperties">
+			<value>
+				<!-- SQL dialect -->
+				hibernate.dialect=org.hibernate.dialect.Oracle10gDialect
+				<!-- Echo all executed SQL to stdout -->
+				hibernate.show_sql=true
+			</value>
+		</property>
+	</bean>
+
+	<bean id="deptDaoObj" class="com.java.demo.dao.DepartmentDAO">
+		<property name="xeConSessionFactory" ref="xeHrSessionFactory" />
+	</bean>
+</beans>
